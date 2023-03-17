@@ -1,12 +1,37 @@
 /*Домашнє завдання по темі "ООП в JS 1"
-Реалізуйте наступну систему, схожу до розглянутої на вебінарі:
-1) чотири класи для створення об'єктів-сутностей (це можуть бути тварини, покемони, раси і т.д. - проявіть фантазію)
-2) у кожного класу має бути мінімум 3 властивості та мінімум 3 методи(але можна й більше)
-3) у кожного класу має бути своя унікальна властивість
-4) у кожного класу має бути приватна властивість
-5) у двох класів має бути спільний предок та спільний метод характерний тільки для них
-6) у всіх чотирьох класів має бути один (крім проміжних) клас-предок */
 
+1) чотири класи для створення об'єктів-сутностей 
+HappinessChecker SandessRemover RebelExecuter MessCleaner + доп клас RegularCitizen та батьківський класс HUMAN
+
+2) у кожного класу має бути мінімум 3 властивості та мінімум 3 методи
+властивості - name type occupation mood 
++ #workDaysCounter 
++ #happyCheckerCount 
++ state
++ position
+методи: 
+для всіх - areYouARobot
+містяни - introduce* shareMood changeMood   introduce* - різне
+робітники - introduce* workerPhrase work    introduce* - різне
+
+3) у кожного класу має бути своя унікальна властивість
+начебто у всіх є :)
+
+4) у кожного класу має бути приватна властивість
+тут не вказано що мають бути унікальні приватні властивості, тому вони є у всії робітників однакові + у HappinessChecker своя
+#workDaysCounter; #happyCheckerCount;
+
+5) у двох класів має бути спільний предок та спільний метод характерний тільки для них
+у всіх робітників спільний предок FactoryWorker та спільні методи, характерні тільки для робітників
+
+6) у всіх чотирьох класів має бути один (крім проміжних) клас-предок
+У всіх классів (4 класси робітників + звичайні люди) один батьківський класс - HUMAN
+*/
+
+
+
+
+//---------------------------------------------
 /*Happiness Factory це така державна установа, яка підтримує високий рівень щастя серед населення
 
 Є чотири типи робітників + звичайні люди
@@ -18,17 +43,18 @@
 */
 
 
-//6. Human це клас-предок усіх кнцевих класів (4 види робітників + містяни)
+
 class Human {
     constructor(name) {
         this.name = name;
         this.type = 'Human'
     }
+    areYouARobot = () => console.log(`I'm only human after all, Don't put your blame on me`);
 }
 
 class RegularCitizen extends Human {
-    constructor(name) {
-        super(name);
+    constructor(name, type) {
+        super(name, type);
         this.occupation = 'Regular Citizen';
         this.mood = getMood();
     }
@@ -37,12 +63,11 @@ class RegularCitizen extends Human {
     changeMood = () => this.mood = getMood();
 }
 
-//5. спільний предок та спільний метод у чотирьох класів
 class FactoryWorker extends Human {
     #workDaysCounter;
-    //4. у кожного класу має бути приватна властивість - не сказано, що вона повинна бути унікальна, тому в мене в 4 класів робітників є каунтер робочих днів і це і є приватна властивість)))
-    constructor(name) {
-        super(name);
+
+    constructor(name, type) {
+        super(name, type);
         this.mood = 'Happy'
         this.occupation = 'Factory Worker';
         this.#workDaysCounter = 0;
@@ -54,68 +79,134 @@ class FactoryWorker extends Human {
 }
 
 class HappinessChecker extends FactoryWorker {
-    constructor(name) {
-        super(name);
+    #happyCheckerCount;
+
+    constructor(name, type, mood, occupation) {
+        super(name, type, mood, occupation);
+        this.hasHappyMeter = true;
+        this.#happyCheckerCount = 0;
+        this.position = 'Happiness Checker';
     }
     checkHappiness = (citizen) => {
         if (citizen.mood === 'Happy') {
             console.log(`${citizen.name} is happy`)
+            citizen.state = 'checked';
         } else if (citizen.mood !== 'Happy') {
             console.log(`${citizen.name} is not happy`)
+            citizen.state = 'notHappy';
         }
-        citizen.state = 'Checked'
+
+        this.#happyCheckerCount = this.#happyCheckerCount + 1;
     }
+    catFact = () => console.log(`Cats are believed to be the only mammals who don’t taste sweetness`)
+
 }
 
 class SandessRemover extends FactoryWorker {
-    constructor(name, mood) {
-        super(name, mood);
+    constructor(name, type, mood, occupation) {
+        super(name, type, mood, occupation);
+        this.hasHappyPills = true;
+        this.position = 'Sandess Remover';
     }
     removeSadness = (citizen) => {
-        if (citizen.state === 'Checked' && citizen.mood === 'Sad') {
+        if (citizen.state === 'notHappy' && citizen.mood === 'Sad') {
             console.log(`${citizen.name} needs some happiness pills`)
             console.log(`Giving ${citizen.name} some pills`)
             citizen.mood = 'Happy'
+            citizen.state = 'usedPills';
             console.log(`Now ${citizen.name} is Happy`)
-        } else if (citizen.state === 'Checked' && citizen.mood === 'Angry') {
-            console.log(`${citizen.name} is too self aware! We cannot help him... Call the executer...`)
+        } else if (citizen.state === 'notHappy' && citizen.mood === 'Angry') {
+            console.log(`${citizen.name} is angry! We cannot help here... Call the executer...`)
             citizen.state = 'Ready for Execution'
+        } else {
         }
     }
 }
 class RebelExecuter extends FactoryWorker {
-    constructor(name, mood) {
-        super(name, mood);
+    constructor(name, type, mood, occupation) {
+        super(name, type, mood, occupation);
+        this.hasWeapon = true;
+        this.position = 'Rebel Executer';
     }
     executeRebel = (citizen) => {
         if (citizen.state === 'Ready for Execution') {
-            console.log(`We are sorry we couldn help you, now you must be executed. Goodbye, ${citizen.name}`)
-            localStorage.setItem('mess', 1)
+            console.log(`We're sorry we couldn help you, now you ~must~ be executed. Goodbye, ${citizen.name}`)
+            localStorage.setItem('mess', true)
+        } else {
         }
     }
 }
 
 class MessCleaner extends FactoryWorker {
-    constructor(name, mood, position) {
-        super(name, mood, position);
+    constructor(name, type, mood, occupation) {
+        super(name, type, mood, occupation);
+        this.hasUniqueFeature = true; //я не знала що придумати
     }
     cleanMess = () => {
-
+        if (localStorage.getItem('mess') === 'true') {
+            console.log(`${this.name} is cleaning the mess`)
+            localStorage.setItem('mess', false)
+        } else {
+            console.log(`Nothing to clean here`)
+        }
     }
+
 }
 
 const Angela = new HappinessChecker('Angela Martin', 'Happy')
 const Andy = new SandessRemover('Andy Bernard', 'Happy')
 const Dwight = new RebelExecuter('Dwight Schrute', 'Happy')
-const Oscar = new MessCleaner('Oscar Martinez', 'Happy')
+const Creed = new MessCleaner('Creed Bratton', 'Happy')
 
 const Pam = new RegularCitizen('Pam Beesly')
 const Jim = new RegularCitizen('Jim Halpert')
 const Stanley = new RegularCitizen('Stanley Hudson')
-const Toby = new RegularCitizen('Toby Flenderson')
+const Kevin = new RegularCitizen('Kevin Malone')
+const Kelly = new RegularCitizen('Kelly Kapoor')
+const Ryan = new RegularCitizen('Ryan Howard')
 
+console.log('---------------------------------------')
+console.log('Introducing a Worker and a Citizent from a Happiness Factory Project😃')
+console.log(Angela)
+console.log(Pam)
+
+
+console.log('---------------------------------------')
+console.log('Time for annual happiness checking!😃')
+
+Angela.checkHappiness(Pam)
+Angela.checkHappiness(Jim)
+Angela.checkHappiness(Stanley)
+Angela.checkHappiness(Kevin)
+Angela.checkHappiness(Kelly)
+Angela.checkHappiness(Ryan)
 
 console.log(Pam)
+console.log('---------------------------------------')
+console.log('Lest fix up those who are in need😃')
+Andy.removeSadness(Pam)
+Andy.removeSadness(Jim)
+Andy.removeSadness(Stanley)
+Andy.removeSadness(Kevin)
+Andy.removeSadness(Kelly)
+Andy.removeSadness(Ryan)
+
+console.log(Pam)
+console.log('---------------------------------------')
+console.log('Goodbuy to all the disturbance😃')
+Dwight.executeRebel(Pam)
+Dwight.executeRebel(Jim)
+Dwight.executeRebel(Stanley)
+Dwight.executeRebel(Kevin)
+Dwight.executeRebel(Kelly)
+Dwight.executeRebel(Ryan)
+
+console.log('---------------------------------------')
+console.log('Cleaning process if needed😃')
+Creed.cleanMess()
+
+
+
 
 
 function getRandomNumber() {
